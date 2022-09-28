@@ -69,49 +69,78 @@
 
 ####Документация к API доступна по адресу `http://127.0.0.1:8000/redoc/`
 
-###Установка
-Клонируем репозиторий на локальную машину:
+## Установка
+##### Шаг 1. Проверьте установлен ли у вас Docker
+Прежде, чем приступать к работе, необходимо знать, что Docker установлен. Для этого достаточно ввести:
+```bash
+docker -v
+```
+Или скачайте [Docker Desktop](https://www.docker.com/products/docker-desktop) для Mac или Windows. [Docker Compose](https://docs.docker.com/compose) будет установлен автоматически. В Linux убедитесь, что у вас установлена последняя версия [Compose](https://docs.docker.com/compose/install/). Также вы можете воспользоваться официальной [инструкцией](https://docs.docker.com/engine/install/).
 
-```
-git clone https://github.com/foggy54/api_yamdb.git
-```
-
-Создаем виртуальное окружение:
-
-```
-python -m venv venv
-```
-
-Устанавливаем зависимости:
-
-```
-pip install -r requirements.txt
-```
-После создайте в корневой директории файл с названием "```.env```" и поместите в него:
-```
-SECRET_KEY=любой_секретный_ключ_на_ваш_выбор
-
-```
-Применяем миграции:
-
-```
-python manage.py migrate
+##### Шаг 2. Клонируйте репозиторий себе на компьютер
+Введите команду:
+```bash
+git clone https://github.com/DenisSivko/infra_sp2.git
 ```
 
-Опционально импортируем данные:
-
+##### Шаг 3. Создайте в клонированной директории файл .env
+Пример:
+```bash
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+DB_HOST=db
+DB_PORT=5432
 ```
-python manage.py runscript load_data
+
+##### Шаг 4. Запуск docker-compose
+Для запуска необходимо выполнить из директории с проектом команду:
+```bash
+docker-compose up -d
 ```
 
-Запуск:
-
+##### Шаг 5. База данных
+Создаем и применяем миграции:
+```bash
+docker-compose exec web python manage.py makemigrations --noinput
+docker-compose exec web python manage.py migrate --noinput
 ```
-python manage.py runserver
+
+##### Шаг 6. Подгружаем статику
+Выполните команду:
+```bash
+docker-compose exec web python manage.py collectstatic --no-input 
 ```
 
-#### Распределение задач в команде
+##### Шаг 7. Заполнение базы тестовыми данными
+Для заполнения базы тестовыми данными вы можете использовать файл fixtures.json, который находится в infra_sp2. Выполните команду:
+```bash
+docker-compose exec web python manage.py loaddata fixtures.json
+```
 
-Первый разработчик(Иван Плакунов) писал всю часть, касающуюся управления пользователями (Auth и Users): систему регистрации и аутентификации, права доступа, работу с токеном, систему подтверждения через e-mail.
-Второй разработчик (Игорь Сараев) писал категории (Categories), жанры (Genres) и произведения (Titles): модели, представления и эндпойнты для них.
-Третий разработчик (Александр Иванченко) занимался отзывами (Review) и комментариями (Comments): описывал модели, представления, настраивал эндпойнты, определял права доступа для запросов и рейтинги произведений.
+##### Другие команды
+Создание суперпользователя:
+```bash
+docker-compose exec web python manage.py createsuperuser
+```
+
+Остановить работу всех контейнеров можно командой:
+```bash
+docker-compose down
+```
+
+Для пересборки и запуска контейнеров воспользуйтесь командой:
+```bash
+docker-compose up -d --build 
+```
+
+Мониторинг запущенных контейнеров:
+```bash
+docker stats
+```
+
+Останавливаем и удаляем контейнеры, сети, тома и образы:
+```bash
+docker-compose down -v
+```
