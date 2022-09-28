@@ -140,6 +140,7 @@ docker-compose up -d --build
 docker stats
 ```
 
+
 Останавливаем и удаляем контейнеры, сети, тома и образы:
 ```bash
 docker-compose down -v
